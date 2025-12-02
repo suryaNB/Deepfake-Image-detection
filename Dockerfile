@@ -1,7 +1,6 @@
-# Use Python 3.10 (required for dlib + TensorFlow)
 FROM python:3.10-slim
 
-# Install system dependencies needed for dlib, face_recognition, TensorFlow, OpenCV, numpy
+# Install system deps needed for dlib, face_recognition, opencv, TF wheels
 RUN apt-get update && apt-get install -y \
     cmake \
     g++ \
@@ -13,20 +12,19 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Copy project code
+# Copy project
 COPY . .
 
-# Upgrade pip, setuptools, wheel (required for building dlib/numpy)
+# Upgrade pip/build tools
 RUN pip install --upgrade pip setuptools wheel
 
-# Install project dependencies
+# Install Python deps
 RUN pip install -r requirements.txt
 
-# Expose port (Railway uses 8080 internally)
+# Expose port (optional for readability)
 EXPOSE 8080
 
-# Start Streamlit app
-CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0"]
+# Use Render's PORT environment variable (Render sets PORT automatically)
+CMD ["bash", "-lc", "streamlit run app.py --server.port=${PORT:-8080} --server.address=0.0.0.0"]
